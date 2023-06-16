@@ -1,0 +1,6 @@
+version: '2.4'
+services:
+  docker-amazonlinux2-python:
+    image: karimlamouri/amazonlinux2-python
+    build: .
+    platform: linux/amd64

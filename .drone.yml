@@ -1,0 +1,64 @@
+when_release: &when_release
+  when:
+    ref:
+      - refs/tags/v*
+
+when_stage: &when_stage
+  when:
+    ref:
+      include:
+        - refs/heads/main
+      exclude:
+        - refs/tags/v*
+
+when_dev: &when_dev
+  when:
+    ref:
+      exclude:
+        - refs/tags/v*
+        - refs/heads/main
+
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: docker-amazonlinux2-python_prod
+    image: plugins/docker
+    settings:
+      username: karimlamouri
+      password:
+        from_secret: docker_password
+      repo: karimlamouri/amazonlinux2-python
+      build_args:
+        - PYTHON_VERSION=3.10.9
+      tags:
+        - latest
+        - ${DRONE_TAG##v}-3.10
+    <<: *when_release
+
+  - name: docker-amazonlinux2-python_stage
+    image: plugins/docker
+    settings:
+      username: karimlamouri
+      password:
+        from_secret: docker_password
+      repo: karimlamouri/amazonlinux2-python
+      build_args:
+        - PYTHON_VERSION=3.10.9
+      tags:
+        - stage-3.10
+    <<: *when_stage
+
+  - name: docker-amazonlinux2-python_dev
+    image: plugins/docker
+    settings:
+      username: karimlamouri
+      password:
+        from_secret: docker_password
+      repo: karimlamouri/amazonlinux2-python
+      build_args:
+        - PYTHON_VERSION=3.10.9
+      tags:
+        - SNAPSHOT-${DRONE_BRANCH}-3.10
+    <<: *when_dev
